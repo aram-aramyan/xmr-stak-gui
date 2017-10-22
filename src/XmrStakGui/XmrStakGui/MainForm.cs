@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -73,6 +75,8 @@ namespace XmrStakGui
 
        private void SetLabelState(Label label, MiningState state = MiningState.None)
         {
+            label.Tag = state;
+
             switch(state)
             {
                 case MiningState.Mining:
@@ -86,13 +90,26 @@ namespace XmrStakGui
             }
         }
 
+        void LoadConfig()
+        {
+            //var config = Config.Load();
+
+            //Config.SaveTxt<XmrStakCpu>(config.Configurations[0], "config.txt");
+
+            //var cpu = Config.LoadTxt<XmrStakCpu>("config.txt");
+
+        }
+
         private void MainForm_Load(object sender, EventArgs e)
         {
+
            InitTabs();
             SelectTab(pCpu);
             SetLabelState(lblCpuStatus);
             SetLabelState(lblAmdStatus);
             SetLabelState(lblNvidiaStatus);
+
+            LoadConfig();
         }
 
         private enum MiningState
@@ -111,12 +128,25 @@ namespace XmrStakGui
 
         private void connectMinerToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            openFileDialog1.ShowDialog();
         }
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            var about = new About();
+            about.ShowDialog();
 
+        }
+
+        private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
+        {
+            AddFile((sender as OpenFileDialog).FileName);
+        }
+
+        private void AddFile(string file)
+        {
+            Config.ImportConfiguration(file);
+            MessageBox.Show("Import complete!");
         }
     }
 }
