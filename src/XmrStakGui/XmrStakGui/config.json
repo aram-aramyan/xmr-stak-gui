@@ -1,8 +1,12 @@
 ﻿{
+  "miners": [
+    {
+      "path": "miner path"
+    }
+  ], 
   "configurations": [
     {
       "name": "config name",
-      "path": "miner path",
       "xmr_stak_cpu": { /*
  * Thread configuration for each thread. Make sure it matches the number above.
  * low_power_mode - This mode will double the cache usage, and double the single thread performance. It will 

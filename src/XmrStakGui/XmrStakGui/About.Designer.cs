@@ -41,8 +41,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(250, 26);
             this.label1.TabIndex = 0;
-            this.label1.Text = "XmrStakGui is a configuration tool for xmr-stak-cpu, \r\nxmr-stak-amd and xmr-stak-" +
-    "nvidia miners.";
+            this.label1.Text = "XmrStakGui is a configuration tool for xmr-stak-cpu, \r\nxmr-stak-amd and xmr-stak-nvidia miners.";
             // 
             // button1
             // 

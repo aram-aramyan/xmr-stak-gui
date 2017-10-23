@@ -54,9 +54,16 @@
     <Compile Include="About.Designer.cs">
       <DependentUpon>About.cs</DependentUpon>
     </Compile>
-    <Compile Include="Config.cs" />
-    <Compile Include="ConfigExtensions.cs" />
-    <Compile Include="Consts.cs" />
+    <Compile Include="Config\AmdGpuThreadsConf.cs" />
+    <Compile Include="Config\Config.cs" />
+    <Compile Include="Config\Configuration.cs" />
+    <Compile Include="Config\Consts.cs" />
+    <Compile Include="Config\CpuThreadsConf.cs" />
+    <Compile Include="Config\Miner.cs" />
+    <Compile Include="Config\NvidiaGpuThreadsConf.cs" />
+    <Compile Include="Config\XmrStakAmd.cs" />
+    <Compile Include="Config\XmrStakCpu.cs" />
+    <Compile Include="Config\XmrStakNvidia.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
