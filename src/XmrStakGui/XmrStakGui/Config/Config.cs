@@ -48,28 +48,24 @@ namespace XmrStakGui
             var fileName = Path.GetFileName(file)?.ToLower();
             if (fileName == null) return;
             var miner = Miners.FirstOrDefault(m => m.Path.Equals(file, StringComparison.InvariantCultureIgnoreCase));
-            if (miner == null)
+            if (miner != null) return;
+            miner = new Miner
             {
-                miner = new Miner
-                {
-                    Path = file
-                };
-                Miners.Add(miner);
-            }
+                Path = file
+            };
+            Miners.Add(miner);
         }
 
-        private void ImportConfiguration(string file)
+        private Configuration ImportConfiguration(string file)
         {
             var fileName = Path.GetFileName(file)?.ToLower();
             var path = Path.GetDirectoryName(file);
-            if (path == null || fileName == null) return;
+            if (path == null || fileName == null) return null;
             var configTxtPath = Path.Combine(path, Consts.ConfigTxtFile);
+            if (!File.Exists(configTxtPath)) return null;
             var json = $"{{{File.ReadAllText(configTxtPath)}}}";
 
-            var configuration = new Configuration
-            {
-                Name = $"Config {DateTime.Now:yyyy-dd-MM-HH-mm-ss}"
-            };
+            var configuration = new Configuration();
 
             switch (fileName)
             {
@@ -82,11 +78,17 @@ namespace XmrStakGui
                 case Consts.NvidiaMiner:
                     configuration.Nvidia = JsonConvert.DeserializeObject<XmrStakNvidia>(json);
                     break;
+                default:
+                    return null;
             }
 
             var existingConfiguration = Configurations.FirstOrDefault(c => EqualConfigurations(c, configuration));
-            if (existingConfiguration == null)
-                Configurations.Add(configuration);
+            if (existingConfiguration != null)
+                return existingConfiguration;
+
+            configuration.Name = $"{fileName} {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
+            Configurations.Add(configuration);
+            return configuration;
         }
 
 
@@ -128,13 +130,15 @@ namespace XmrStakGui
             if (type != right.GetType())
                 return false;
 
-            if (left as ValueType != null)
+            if (left is ValueType)
                 return left.Equals(right);
 
             // all Arrays, Lists, IEnumerable<> etc implement IEnumerable
-            if (left as IEnumerable != null)
+            if (left is IEnumerable)
             {
-                var rightEnumerator = (right as IEnumerable).GetEnumerator();
+                var enumerable = right as IEnumerable;
+                if (enumerable == null) return true;
+                var rightEnumerator = enumerable.GetEnumerator();
                 rightEnumerator.Reset();
                 foreach (var leftItem in left as IEnumerable)
                     // unequal amount of items

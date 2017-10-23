@@ -1,20 +1,22 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using XmrStakGui.Properties;
 
 namespace XmrStakGui
 {
     public partial class MainForm : Form
     {
-        private readonly Color BadColor = Color.Red;
-        private readonly Color BColor = Color.White;
-        private readonly Color GoodColor = Color.Green;
-        private readonly Color InactiveColor = Color.Gray;
-        private readonly Color WarningColor = Color.Orange;
+        //private readonly Color _badColor = Color.Red;
+        private readonly Color _bColor = Color.White;
+        private readonly Color _goodColor = Color.Green;
+        private readonly Color _inactiveColor = Color.Gray;
+        //private readonly Color _warningColor = Color.Orange;
 
-        private Panel selectedPanel;
+        private Panel _selectedPanel;
 
 
         public MainForm()
@@ -29,10 +31,10 @@ namespace XmrStakGui
 
         private void panelChild_MouseClick(object sender, MouseEventArgs e)
         {
-            panel_MouseClick((sender as Control).Parent, e);
+            if (sender is Control control) panel_MouseClick(control.Parent, e);
         }
 
-        private void bindOnClickForPanel(Panel panel)
+        public void BindOnClickForPanel(Panel panel)
         {
             var controls = panel.Controls.Cast<Control>();
             foreach (var control in controls)
@@ -46,58 +48,42 @@ namespace XmrStakGui
             {
                 panel.Cursor = Cursors.Hand;
                 panel.MouseClick += panel_MouseClick;
-                bindOnClickForPanel(panel);
+                BindOnClickForPanel(panel);
             }
         }
 
         private void SelectTab(Panel panel)
         {
-            if (selectedPanel != null)
-                selectedPanel.BackColor = Color.Transparent;
+            if (_selectedPanel != null)
+                _selectedPanel.BackColor = Color.Transparent;
 
-            selectedPanel = panel;
-            if (selectedPanel != null)
-            {
-                selectedPanel.BackColor = Color.White;
-                tabControl.SelectTab(selectedPanel.Tag.ToString());
-            }
+            _selectedPanel = panel;
+            if (_selectedPanel == null) return;
+            _selectedPanel.BackColor = _bColor;
+            tabControl.SelectTab(_selectedPanel.Tag.ToString());
         }
 
-        private void SetLabelState(Label label, MiningState state = MiningState.None)
+        private void SetLabelState(Label label, MiningState state = MiningState.None, params object[] values)
         {
-            label.Tag = state;
-
             switch (state)
             {
                 case MiningState.Mining:
-                    label.Text = "Mining";
-                    label.ForeColor = GoodColor;
+                    label.Text = string.Format(Resources.MainForm_SetLabelState_Mining, values);
+                    label.ForeColor = _goodColor;
                     break;
                 default:
-                    label.Text = "Not mining";
-                    label.ForeColor = InactiveColor;
+                    label.Text = Resources.MainForm_SetLabelState_Not_mining;
+                    label.ForeColor = _inactiveColor;
                     break;
             }
-        }
-
-        private void LoadConfig()
-        {
-            //var config = Config.Load();
-
-            //Config.SaveTxt<XmrStakCpu>(config.Configurations[0], "config.txt");
-
-            //var cpu = Config.LoadTxt<XmrStakCpu>("config.txt");
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
             InitTabs();
             SelectTab(pCpu);
-            SetLabelState(lblCpuStatus);
-            SetLabelState(lblAmdStatus);
-            SetLabelState(lblNvidiaStatus);
-
-            LoadConfig();
+            SetStatusLabelTags();
+            CheckMinersState();
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -118,22 +104,56 @@ namespace XmrStakGui
 
         private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
         {
-            AddFile((sender as OpenFileDialog).FileName);
+            if (sender is OpenFileDialog openFileDialog) AddFile(openFileDialog.FileName);
         }
 
-        private void AddFile(string file)
+        private static void AddFile(string file)
         {
             Config.Import(file);
-            MessageBox.Show("Import complete!");
+            MessageBox.Show(Resources.MainForm_AddFile_Import_complete_);
         }
 
         private enum MiningState
         {
             None,
-            NotMining,
-            NotSupported,
-            NotFound,
             Mining
+        }
+
+        private void SetStatusLabelTags()
+        {
+            lblCpuStatus.Tag = Consts.CpuMiner;
+            lblAmdStatus.Tag = Consts.AmdMiner;
+            lblNvidiaStatus.Tag = Consts.NvidiaMiner;
+        }
+
+        private void CheckMinersState()
+        {
+            var processes = Process.GetProcesses();
+            SetMinerStateLabel(lblCpuStatus, processes);
+            SetMinerStateLabel(lblAmdStatus, processes);
+            SetMinerStateLabel(lblNvidiaStatus, processes);
+        }
+
+        private void SetMinerStateLabel(Label label, Process[] processes)
+        {
+            var minerName = label.Tag.ToString();
+
+            var minersCount = processes.Count(p => p.ProcessName == minerName);
+
+            if (minersCount == 0)
+            {
+                SetLabelState(label);
+            }
+            else
+            {
+                SetLabelState(label, MiningState.Mining, ": " + minersCount);
+            }
+
+        }
+
+        private void stateTimer_Tick(object sender, EventArgs e)
+        {
+            CheckMinersState();
         }
     }
 }

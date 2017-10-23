@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.splitContainer = new System.Windows.Forms.SplitContainer();
             this.pNvidia = new System.Windows.Forms.Panel();
@@ -39,6 +40,10 @@
             this.pCpu = new System.Windows.Forms.Panel();
             this.lblCpuStatus = new System.Windows.Forms.Label();
             this.lblCpuName = new System.Windows.Forms.Label();
+            this.tabControl = new XmrStakGui.TablessControl();
+            this.tabCpu = new System.Windows.Forms.TabPage();
+            this.tabAmd = new System.Windows.Forms.TabPage();
+            this.tabNvidia = new System.Windows.Forms.TabPage();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -48,10 +53,7 @@
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.tabControl = new XmrStakGui.TablessControl();
-            this.tabCpu = new System.Windows.Forms.TabPage();
-            this.tabAmd = new System.Windows.Forms.TabPage();
-            this.tabNvidia = new System.Windows.Forms.TabPage();
+            this.stateTimer = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
             this.splitContainer.Panel1.SuspendLayout();
             this.splitContainer.Panel2.SuspendLayout();
@@ -59,8 +61,8 @@
             this.pNvidia.SuspendLayout();
             this.pAmd.SuspendLayout();
             this.pCpu.SuspendLayout();
-            this.menuStrip1.SuspendLayout();
             this.tabControl.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainer
@@ -178,6 +180,47 @@
             this.lblCpuName.TabIndex = 0;
             this.lblCpuName.Text = "CPU mining";
             // 
+            // tabControl
+            // 
+            this.tabControl.Controls.Add(this.tabCpu);
+            this.tabControl.Controls.Add(this.tabAmd);
+            this.tabControl.Controls.Add(this.tabNvidia);
+            this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl.Location = new System.Drawing.Point(0, 0);
+            this.tabControl.Name = "tabControl";
+            this.tabControl.SelectedIndex = 0;
+            this.tabControl.Size = new System.Drawing.Size(461, 351);
+            this.tabControl.TabIndex = 0;
+            // 
+            // tabCpu
+            // 
+            this.tabCpu.BackColor = System.Drawing.Color.White;
+            this.tabCpu.Location = new System.Drawing.Point(4, 22);
+            this.tabCpu.Name = "tabCpu";
+            this.tabCpu.Padding = new System.Windows.Forms.Padding(3);
+            this.tabCpu.Size = new System.Drawing.Size(453, 325);
+            this.tabCpu.TabIndex = 0;
+            this.tabCpu.Text = "CPU";
+            // 
+            // tabAmd
+            // 
+            this.tabAmd.BackColor = System.Drawing.Color.White;
+            this.tabAmd.Location = new System.Drawing.Point(4, 22);
+            this.tabAmd.Name = "tabAmd";
+            this.tabAmd.Padding = new System.Windows.Forms.Padding(3);
+            this.tabAmd.Size = new System.Drawing.Size(453, 325);
+            this.tabAmd.TabIndex = 1;
+            this.tabAmd.Text = "AMD";
+            // 
+            // tabNvidia
+            // 
+            this.tabNvidia.BackColor = System.Drawing.Color.White;
+            this.tabNvidia.Location = new System.Drawing.Point(4, 22);
+            this.tabNvidia.Name = "tabNvidia";
+            this.tabNvidia.Size = new System.Drawing.Size(453, 325);
+            this.tabNvidia.TabIndex = 2;
+            this.tabNvidia.Text = "NVIDIA";
+            // 
             // statusStrip1
             // 
             this.statusStrip1.Location = new System.Drawing.Point(0, 374);
@@ -248,46 +291,11 @@
             this.openFileDialog1.ShowReadOnly = true;
             this.openFileDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.openFileDialog1_FileOk);
             // 
-            // tabControl
+            // stateTimer
             // 
-            this.tabControl.Controls.Add(this.tabCpu);
-            this.tabControl.Controls.Add(this.tabAmd);
-            this.tabControl.Controls.Add(this.tabNvidia);
-            this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl.Location = new System.Drawing.Point(0, 0);
-            this.tabControl.Name = "tabControl";
-            this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(461, 351);
-            this.tabControl.TabIndex = 0;
-            // 
-            // tabCpu
-            // 
-            this.tabCpu.BackColor = System.Drawing.Color.White;
-            this.tabCpu.Location = new System.Drawing.Point(4, 22);
-            this.tabCpu.Name = "tabCpu";
-            this.tabCpu.Padding = new System.Windows.Forms.Padding(3);
-            this.tabCpu.Size = new System.Drawing.Size(453, 325);
-            this.tabCpu.TabIndex = 0;
-            this.tabCpu.Text = "CPU";
-            // 
-            // tabAmd
-            // 
-            this.tabAmd.BackColor = System.Drawing.Color.White;
-            this.tabAmd.Location = new System.Drawing.Point(4, 22);
-            this.tabAmd.Name = "tabAmd";
-            this.tabAmd.Padding = new System.Windows.Forms.Padding(3);
-            this.tabAmd.Size = new System.Drawing.Size(453, 325);
-            this.tabAmd.TabIndex = 1;
-            this.tabAmd.Text = "AMD";
-            // 
-            // tabNvidia
-            // 
-            this.tabNvidia.BackColor = System.Drawing.Color.White;
-            this.tabNvidia.Location = new System.Drawing.Point(4, 22);
-            this.tabNvidia.Name = "tabNvidia";
-            this.tabNvidia.Size = new System.Drawing.Size(453, 325);
-            this.tabNvidia.TabIndex = 2;
-            this.tabNvidia.Text = "NVIDIA";
+            this.stateTimer.Enabled = true;
+            this.stateTimer.Interval = 5000;
+            this.stateTimer.Tick += new System.EventHandler(this.stateTimer_Tick);
             // 
             // MainForm
             // 
@@ -314,9 +322,9 @@
             this.pAmd.PerformLayout();
             this.pCpu.ResumeLayout(false);
             this.pCpu.PerformLayout();
+            this.tabControl.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            this.tabControl.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -347,6 +355,7 @@
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private System.Windows.Forms.Timer stateTimer;
     }
 }
 

@@ -114,4 +114,13 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="MainForm_AddFile_Import_complete_" xml:space="preserve">
+    <value>Import complete!</value>
+  </data>
+  <data name="MainForm_SetLabelState_Mining" xml:space="preserve">
+    <value>Mining{0}</value>
+  </data>
+  <data name="MainForm_SetLabelState_Not_mining" xml:space="preserve">
+    <value>Not mining</value>
+  </data>
 </root>
