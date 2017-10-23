@@ -2,9 +2,9 @@
 * Manage multiple miners
 * Start/Stop
 * Configure:
- * Import existing config.txt
- * Manage multiple configurations for a miner
- * Save configuration to a config.txt for selected miner
+  * Import existing config.txt
+  * Manage multiple configurations for a miner
+  * Save configuration to a config.txt for selected miner
 
 
 For a **CPU miner** please check out
