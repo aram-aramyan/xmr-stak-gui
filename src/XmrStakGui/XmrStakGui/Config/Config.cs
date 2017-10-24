@@ -13,21 +13,20 @@ namespace XmrStakGui
 {
     public class Config
     {
-        [JsonProperty("configurations")]
-        public List<Configuration> Configurations { get; set; }
+        #region json properties
+
+        [JsonProperty("settings")]
+        public Settings Settings { get; set; }
 
         [JsonProperty("miners")]
         public List<Miner> Miners { get; set; }
 
-        private static string GetConfigFilePath()
-        {
-            return Path.Combine(Path.GetDirectoryName(Application.ExecutablePath) ?? string.Empty, Consts.ConfigFile);
-        }
+        [JsonProperty("configurations")]
+        public List<Configuration> Configurations { get; set; }
 
-        public static Config Load()
-        {
-            return JsonConvert.DeserializeObject<Config>(File.ReadAllText(GetConfigFilePath()));
-        }
+        #endregion
+
+        #region methods
 
         public void Save()
         {
@@ -35,31 +34,32 @@ namespace XmrStakGui
                 Encoding.UTF8);
         }
 
-        public static void Import(string file)
+        public Configuration Import(string minerFile)
         {
-            var config = Load();
-            config.ImportMiner(file);
-            config.ImportConfiguration(file);
-            config.Save();
+            ImportMiner(minerFile);
+            var configuration = ImportConfiguration(minerFile);
+            Save();
+
+            return configuration;
         }
 
-        private void ImportMiner(string file)
+        public void ImportMiner(string minerFile)
         {
-            var fileName = Path.GetFileName(file)?.ToLower();
+            var fileName = Path.GetFileName(minerFile)?.ToLower();
             if (fileName == null) return;
-            var miner = Miners.FirstOrDefault(m => m.Path.Equals(file, StringComparison.InvariantCultureIgnoreCase));
+            var miner = Miners.FirstOrDefault(m => m.Path.Equals(minerFile, StringComparison.InvariantCultureIgnoreCase));
             if (miner != null) return;
             miner = new Miner
             {
-                Path = file
+                Path = minerFile
             };
             Miners.Add(miner);
         }
 
-        private Configuration ImportConfiguration(string file)
+        public Configuration ImportConfiguration(string minerFile)
         {
-            var fileName = Path.GetFileName(file)?.ToLower();
-            var path = Path.GetDirectoryName(file);
+            var fileName = Path.GetFileName(minerFile)?.ToLower();
+            var path = Path.GetDirectoryName(minerFile);
             if (path == null || fileName == null) return null;
             var configTxtPath = Path.Combine(path, Consts.ConfigTxtFile);
             if (!File.Exists(configTxtPath)) return null;
@@ -91,14 +91,26 @@ namespace XmrStakGui
             return configuration;
         }
 
+        #endregion
 
-        //public static T LoadTxt<T>(string file)
-        //{
-        //    return JsonConvert.DeserializeObject<T>($"{{{File.ReadAllText(file)}}}");
-        //}
+        #region static methods
 
-        public static void SaveTxt<T>(Configuration config, string file)
+
+        private static string GetConfigFilePath()
         {
+            return Path.Combine(Path.GetDirectoryName(Application.ExecutablePath) ?? string.Empty, Consts.ConfigFile);
+        }
+
+        public static Config Load()
+        {
+            return JsonConvert.DeserializeObject<Config>(File.ReadAllText(GetConfigFilePath()));
+        }
+
+        public static void SaveTxt<T>(Configuration config, string minerFile)
+        {
+            var path = Path.GetDirectoryName(minerFile);
+            if (path == null) return;
+            var configTxtPath = Path.Combine(path, Consts.ConfigTxtFile);
             var property = config.GetType()
                 .GetProperties()
                 .FirstOrDefault(p => p.PropertyType == typeof(T));
@@ -108,7 +120,7 @@ namespace XmrStakGui
             var json = JsonConvert.SerializeObject(property.GetValue(config), Formatting.Indented);
             var text = json.Trim('{', '}', ' ', '\n', '\r', '\t');
 
-            File.WriteAllText(file, text, Encoding.UTF8);
+            File.WriteAllText(configTxtPath, text, Encoding.UTF8);
         }
 
         private static bool EqualConfigurations(Configuration configuration1, Configuration configuration2)
@@ -175,5 +187,7 @@ namespace XmrStakGui
             }
             return true;
         }
+
+        #endregion
     }
 }

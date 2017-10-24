@@ -1,9 +1,14 @@
 ﻿{
+  "settings": {
+    "check_for_updates": true,
+    "update_url": "",
+    "language": "en"
+  }, 
   "miners": [
     {
       "path": "miner path"
     }
-  ], 
+  ],
   "configurations": [
     {
       "name": "config name",

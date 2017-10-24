@@ -2,7 +2,9 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using XmrStakGui.Properties;
 
@@ -15,12 +17,15 @@ namespace XmrStakGui
         private readonly Color _goodColor = Color.Green;
         private readonly Color _inactiveColor = Color.Gray;
         //private readonly Color _warningColor = Color.Orange;
+        private readonly Config _config;
 
         private Panel _selectedPanel;
 
 
         public MainForm()
         {
+            _config = Config.Load();
+            SetCurrentLanguage(_config.Settings.Language);
             InitializeComponent();
         }
 
@@ -86,6 +91,12 @@ namespace XmrStakGui
             CheckMinersState();
         }
 
+
+        private static void SetCurrentLanguage(string lang)
+        {
+            Thread.CurrentThread.CurrentUICulture = new CultureInfo(lang);
+        }
+
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
@@ -107,9 +118,9 @@ namespace XmrStakGui
             if (sender is OpenFileDialog openFileDialog) AddFile(openFileDialog.FileName);
         }
 
-        private static void AddFile(string file)
+        private void AddFile(string file)
         {
-            Config.Import(file);
+            _config.Import(file);
             MessageBox.Show(Resources.MainForm_AddFile_Import_complete_);
         }
 
