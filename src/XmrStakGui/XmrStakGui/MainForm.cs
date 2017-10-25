@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
@@ -18,6 +18,7 @@ namespace XmrStakGui
         private readonly Color _inactiveColor = Color.Gray;
         //private readonly Color _warningColor = Color.Orange;
         private readonly Config _config;
+        private readonly ProcessService _processService = new ProcessService();
 
         private Panel _selectedPanel;
 
@@ -48,7 +49,7 @@ namespace XmrStakGui
 
         private void InitTabs()
         {
-            var panels = new[] {pCpu, pAmd, pNvidia};
+            var panels = new[] { pCpu, pAmd, pNvidia };
             foreach (var panel in panels)
             {
                 panel.Cursor = Cursors.Hand;
@@ -89,6 +90,7 @@ namespace XmrStakGui
             SelectTab(pCpu);
             SetStatusLabelTags();
             CheckMinersState();
+            FillCpuMinersList();
         }
 
 
@@ -139,32 +141,142 @@ namespace XmrStakGui
 
         private void CheckMinersState()
         {
-            var processes = Process.GetProcesses();
-            SetMinerStateLabel(lblCpuStatus, processes);
-            SetMinerStateLabel(lblAmdStatus, processes);
-            SetMinerStateLabel(lblNvidiaStatus, processes);
+            SetMinerStateLabel(lblCpuStatus, lblAmdStatus, lblNvidiaStatus);
         }
 
-        private void SetMinerStateLabel(Label label, Process[] processes)
+        private void SetMinerStateLabel(params Label[] labels)
         {
-            var minerName = label.Tag.ToString();
-
-            var minersCount = processes.Count(p => p.ProcessName == minerName);
-
-            if (minersCount == 0)
+            var minerNames = labels.Select(l => l.Tag.ToString()).ToArray();
+            var minersCounts = _processService.GetCountsOfInstances(minerNames);
+            for (var i = 0; i < labels.Length; i++)
             {
-                SetLabelState(label);
+                if (minersCounts[i] == 0)
+                    SetLabelState(labels[i]);
+                else
+                    SetLabelState(labels[i], MiningState.Mining, ": " + minersCounts[i]);
             }
-            else
-            {
-                SetLabelState(label, MiningState.Mining, ": " + minersCount);
-            }
-
         }
 
         private void stateTimer_Tick(object sender, EventArgs e)
         {
             CheckMinersState();
         }
+
+        private void notifyIcon1_Click(object sender, EventArgs e)
+        {
+            this.ShowInTaskbar = true;
+            this.WindowState = FormWindowState.Minimized;
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
+        }
+
+        private void MainForm_Resize(object sender, EventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                this.ShowInTaskbar = false;
+                this.Hide();
+            }
+        }
+
+        private void MainForm_VisibleChanged(object sender, EventArgs e)
+        {
+            this.notifyIcon1.Visible = !this.Visible;
+        }
+
+        private void stopAllMinersToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _processService.StopMiners();
+            FillCpuMinersList();
+            CheckMinersState();
+        }
+
+        private void FillCpuMinersList()
+        {
+            var miners = _processService
+                .GetRunningMiners()
+                .Where(m => m.Name == Consts.CpuMiner)
+                .ToList();
+
+            foreach (var miner in miners.Where(m => m.Config == null))
+            {
+                miner.Config = _config.Miners.FirstOrDefault(m => m.Path.Equals(miner.Path, StringComparison.InvariantCultureIgnoreCase));
+                if (miner.Config != null)
+                {
+                    miner.State = MinerProcess.MinerState.Mining;
+                }
+            }
+
+            miners.AddRange(_config.Miners
+                .Where(m => !miners.Any(m1 => m1.Path.Equals(m.Path, StringComparison.InvariantCultureIgnoreCase)))
+                .Select(m => new MinerProcess
+                {
+                    Path = m.Path,
+                    State = MinerProcess.MinerState.NotMining,
+                    Config = m
+                }));
+
+            cmbCpu.DataSource = miners;
+        }
+
+
+        private void cmbCpu_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            cmdCpuImport.Enabled = cmdCpuRun.Enabled = cmdCpuStop.Enabled = false;
+
+            var miner = cmbCpu.SelectedItem as MinerProcess;
+            if (miner == null) return;
+
+            switch (miner.State)
+            {
+                case MinerProcess.MinerState.New:
+                    cmdCpuImport.Enabled = true;
+                    break;
+                case MinerProcess.MinerState.NotMining:
+                    cmdCpuRun.Enabled = true;
+                    break;
+            }
+            cmdCpuStop.Enabled = !cmdCpuRun.Enabled;
+            cmdCpuRestart.Enabled = cmdCpuStop.Enabled;
+            cmdCpuRun.Enabled = true;
+        }
+
+        private void cmdCpuImport_Click(object sender, EventArgs e)
+        {
+            var miner = cmbCpu.SelectedItem as MinerProcess;
+            if (miner == null) return;
+            AddFile(miner.Path);
+            FillCpuMinersList();
+        }
+
+        private void cmdCpuRun_Click(object sender, EventArgs e)
+        {
+            var miner = cmbCpu.SelectedItem as MinerProcess;
+            if (miner == null) return;
+            _processService.RunMiner(miner.Path);
+            FillCpuMinersList();
+            CheckMinersState();
+        }
+
+        private void cmdCpuStop_Click(object sender, EventArgs e)
+        {
+            var miner = cmbCpu.SelectedItem as MinerProcess;
+            if (miner == null) return;
+            miner.Stop();
+            FillCpuMinersList();
+            CheckMinersState();
+        }
+
+        private void cmdCpuRestart_Click(object sender, EventArgs e)
+        {
+            var miner = cmbCpu.SelectedItem as MinerProcess;
+            if (miner == null) return;
+            miner.Stop();
+            _processService.RunMiner(miner.Path);
+            FillCpuMinersList();
+            CheckMinersState();
+        }
+
+       
     }
 }

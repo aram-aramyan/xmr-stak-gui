@@ -47,6 +47,9 @@ namespace XmrStakGui
         {
             var fileName = Path.GetFileName(minerFile)?.ToLower();
             if (fileName == null) return;
+            if (!Consts.Miners.Contains(fileName))
+                throw new NotSupportedException("The specified file is not a supported miner");
+
             var miner = Miners.FirstOrDefault(m => m.Path.Equals(minerFile, StringComparison.InvariantCultureIgnoreCase));
             if (miner != null) return;
             miner = new Miner

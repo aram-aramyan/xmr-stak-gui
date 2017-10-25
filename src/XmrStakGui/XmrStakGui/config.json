@@ -6,7 +6,7 @@
   }, 
   "miners": [
     {
-      "path": "miner path"
+      "path": "C:\\xmr-stak-cpu\\xmr-stak-cpu.exe"
     }
   ],
   "configurations": [
