@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
@@ -90,7 +91,6 @@ namespace XmrStakGui
             SelectTab(pCpu);
             SetStatusLabelTags();
             CheckMinersState();
-            FillCpuMinersList();
         }
 
 
@@ -117,13 +117,15 @@ namespace XmrStakGui
 
         private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
         {
-            if (sender is OpenFileDialog openFileDialog) AddFile(openFileDialog.FileName);
+            if (sender is OpenFileDialog openFileDialog)
+                AddFile(openFileDialog.FileName);
         }
 
         private void AddFile(string file)
         {
             _config.Import(file);
             MessageBox.Show(Resources.MainForm_AddFile_Import_complete_);
+            CheckMinersState();
         }
 
         private enum MiningState
@@ -139,9 +141,10 @@ namespace XmrStakGui
             lblNvidiaStatus.Tag = Consts.NvidiaMiner;
         }
 
-        private void CheckMinersState()
+        private void CheckMinersState(bool forceUpdate = false)
         {
             SetMinerStateLabel(lblCpuStatus, lblAmdStatus, lblNvidiaStatus);
+            FillCpuMinersList(forceUpdate);
         }
 
         private void SetMinerStateLabel(params Label[] labels)
@@ -187,14 +190,13 @@ namespace XmrStakGui
         private void stopAllMinersToolStripMenuItem_Click(object sender, EventArgs e)
         {
             _processService.StopMiners();
-            FillCpuMinersList();
-            CheckMinersState();
+            CheckMinersState(true);
         }
 
-        private void FillCpuMinersList()
+        private void FillCpuMinersList(bool forceUpdate = false)
         {
             var miners = _processService
-                .GetRunningMiners()
+                .GetRunningMiners(forceUpdate)
                 .Where(m => m.Name == Consts.CpuMiner)
                 .ToList();
 
@@ -238,7 +240,9 @@ namespace XmrStakGui
             }
             cmdCpuStop.Enabled = !cmdCpuRun.Enabled;
             cmdCpuRestart.Enabled = cmdCpuStop.Enabled;
-            cmdCpuRun.Enabled = true;
+
+            if (cmdCpuRun.Enabled && !File.Exists(miner.Path))
+                cmdCpuRun.Enabled = false;
         }
 
         private void cmdCpuImport_Click(object sender, EventArgs e)
@@ -246,7 +250,6 @@ namespace XmrStakGui
             var miner = cmbCpu.SelectedItem as MinerProcess;
             if (miner == null) return;
             AddFile(miner.Path);
-            FillCpuMinersList();
         }
 
         private void cmdCpuRun_Click(object sender, EventArgs e)
@@ -254,8 +257,7 @@ namespace XmrStakGui
             var miner = cmbCpu.SelectedItem as MinerProcess;
             if (miner == null) return;
             _processService.RunMiner(miner.Path);
-            FillCpuMinersList();
-            CheckMinersState();
+            CheckMinersState(true);
         }
 
         private void cmdCpuStop_Click(object sender, EventArgs e)
@@ -263,8 +265,7 @@ namespace XmrStakGui
             var miner = cmbCpu.SelectedItem as MinerProcess;
             if (miner == null) return;
             miner.Stop();
-            FillCpuMinersList();
-            CheckMinersState();
+            CheckMinersState(true);
         }
 
         private void cmdCpuRestart_Click(object sender, EventArgs e)
@@ -273,10 +274,41 @@ namespace XmrStakGui
             if (miner == null) return;
             miner.Stop();
             _processService.RunMiner(miner.Path);
-            FillCpuMinersList();
-            CheckMinersState();
+            CheckMinersState(true);
         }
 
-       
+        internal static void MainForm_UIThreadException(object sender, ThreadExceptionEventArgs t)
+        {
+            DialogResult result = DialogResult.Cancel;
+            try
+            {
+                result = ShowThreadExceptionDialog("Windows Forms Error", t.Exception);
+            }
+            catch
+            {
+                try
+                {
+                    MessageBox.Show("Fatal Windows Forms Error",
+                        "Fatal Windows Forms Error", MessageBoxButtons.AbortRetryIgnore, MessageBoxIcon.Stop);
+                }
+                finally
+                {
+                    Application.Exit();
+                }
+            }
+
+            // Exits the program when the user clicks Abort.
+            if (result == DialogResult.Abort)
+                Application.Exit();
+        }
+
+        private static DialogResult ShowThreadExceptionDialog(string title, Exception e)
+        {
+            string errorMsg = "An application error occurred. Please contact the adminstrator " +
+                "with the following information:\n\n";
+            errorMsg = errorMsg + e.Message + "\n\nStack Trace:\n" + e.StackTrace;
+            return MessageBox.Show(errorMsg, title, MessageBoxButtons.AbortRetryIgnore,
+                MessageBoxIcon.Stop);
+        }
     }
 }

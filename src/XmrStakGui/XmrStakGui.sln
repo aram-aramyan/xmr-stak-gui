@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2002
+VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XmrStakGui", "XmrStakGui\XmrStakGui.csproj", "{78801392-87B1-4BDA-9E16-D85A35ED3672}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleProcess", "SampleProcess\SampleProcess.csproj", "{2A66EC04-E92C-4608-9F35-35D55B095B3A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{78801392-87B1-4BDA-9E16-D85A35ED3672}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78801392-87B1-4BDA-9E16-D85A35ED3672}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78801392-87B1-4BDA-9E16-D85A35ED3672}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A66EC04-E92C-4608-9F35-35D55B095B3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A66EC04-E92C-4608-9F35-35D55B095B3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A66EC04-E92C-4608-9F35-35D55B095B3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A66EC04-E92C-4608-9F35-35D55B095B3A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

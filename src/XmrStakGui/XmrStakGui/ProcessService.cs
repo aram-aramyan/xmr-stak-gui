@@ -26,9 +26,9 @@ namespace XmrStakGui
 
         private List<MinerProcess> _runningMiners;
         private DateTime _lastMinersListUpdate = DateTime.MinValue;
-        internal List<MinerProcess> GetRunningMiners()
+        internal List<MinerProcess> GetRunningMiners(bool forceUpdate = false)
         {
-            if ((DateTime.UtcNow - _lastMinersListUpdate).TotalSeconds > 5)
+            if ((DateTime.UtcNow - _lastMinersListUpdate).TotalSeconds > 5 || forceUpdate)
             {
                 var names = Consts.Miners;
                 var query = "SELECT ProcessId, ExecutablePath FROM Win32_Process";
@@ -76,7 +76,9 @@ namespace XmrStakGui
         {
             var startInfo = new ProcessStartInfo
             {
-                FileName = path
+                FileName = path,
+                UseShellExecute = false,
+                WorkingDirectory = Path.GetDirectoryName(path)
             };
             Process.Start(startInfo);
         }
